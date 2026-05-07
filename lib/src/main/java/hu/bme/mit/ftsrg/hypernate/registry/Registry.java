@@ -23,8 +23,7 @@ import org.slf4j.LoggerFactory;
 @Loggable(Loggable.DEBUG)
 public class Registry {
 
-  RegistryStorageBackend backend; // = SimpleJSONB, ShardingJsonB
-  //kiezsrvezzük, alternatív storagebackend
+  RegistryStorageBackend backend;
 
   private static final Logger logger = LoggerFactory.getLogger(Registry.class);
 
