@@ -1,6 +1,6 @@
 package hu.bme.mit.ftsrg.hypernate.annotations;
 
-import hu.bme.mit.ftsrg.hypernate.registry.RegistryInterceptor;
+import hu.bme.mit.ftsrg.hypernate.registry.RegistryStorageBackend;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,5 +13,5 @@ import java.lang.annotation.Target;
 public @interface RegistryInterceptorInfo {
     String name();
 
-    Class<? extends RegistryInterceptor> func();
+    Class<? extends RegistryStorageBackend> func();
 }

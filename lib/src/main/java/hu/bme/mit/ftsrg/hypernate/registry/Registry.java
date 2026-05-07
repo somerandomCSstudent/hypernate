@@ -23,6 +23,9 @@ import org.slf4j.LoggerFactory;
 @Loggable(Loggable.DEBUG)
 public class Registry {
 
+  RegistryStorageBackend backend; // = SimpleJSONB, ShardingJsonB
+  //kiezsrvezzük, alternatív storagebackend
+
   private static final Logger logger = LoggerFactory.getLogger(Registry.class);
 
   private final ChaincodeStub stub;
@@ -35,7 +38,7 @@ public class Registry {
    * Create a new entity.
    *
    * @param entity the entity to create
-   * @param <T> the entity type
+   * @param <T>    the entity type
    * @throws EntityExistsException if the entity already exists in the ledger
    */
   public <T> void mustCreate(final T entity) throws EntityExistsException {
@@ -68,8 +71,9 @@ public class Registry {
    * Update an existing entity.
    *
    * @param entity the entity to update
-   * @param <T> the entity type
-   * @throws EntityNotFoundException if the entity does not yet exist on the ledger
+   * @param <T>    the entity type
+   * @throws EntityNotFoundException if the entity does not yet exist on the
+   *                                 ledger
    */
   public <T> void mustUpdate(final T entity) throws EntityNotFoundException {
     assertExists(entity);
@@ -101,7 +105,7 @@ public class Registry {
    * Delete an existing entity.
    *
    * @param entity the entity to delete
-   * @param <T> the entity type
+   * @param <T>    the entity type
    * @throws EntityNotFoundException if the entity was not found in the ledger
    */
   public <T> void mustDelete(final T entity) throws EntityNotFoundException {
@@ -132,11 +136,12 @@ public class Registry {
   /**
    * Read an existing entity.
    *
-   * @param clazz the class of the entity
+   * @param clazz    the class of the entity
    * @param keyParts the list of primary keys identifying the entity
    * @return the entity read and deserialized from the ledger
    * @param <T> the entity type
-   * @throws EntityNotFoundException if an entity with the given primary keys was not found
+   * @throws EntityNotFoundException if an entity with the given primary keys was
+   *                                 not found
    */
   public <T> T mustRead(Class<T> clazz, Object... keyParts) throws EntityNotFoundException {
     int primaryKeyCount = EntityUtil.getPrimaryKeyCount(clazz);
@@ -151,10 +156,9 @@ public class Registry {
               + clazz.getName());
     }
 
-    final String key =
-        stub.createCompositeKey(
-                EntityUtil.getType(clazz), EntityUtil.mapKeyPartsToString(clazz, keyParts))
-            .toString();
+    final String key = stub.createCompositeKey(
+        EntityUtil.getType(clazz), EntityUtil.mapKeyPartsToString(clazz, keyParts))
+        .toString();
     final byte[] data = stub.getState(key);
 
     if (data == null || data.length == 0) {
@@ -168,8 +172,9 @@ public class Registry {
    * Read an entity if it exists.
    *
    * @param clazz the class of the entity
-   * @param keys the list of primary keys identifying the entity
-   * @return the entity read and deserialized from the ledger if found, {@code null} otherwise
+   * @param keys  the list of primary keys identifying the entity
+   * @return the entity read and deserialized from the ledger if found,
+   *         {@code null} otherwise
    * @param <T> the entity type
    */
   public <T> T tryRead(Class<T> clazz, Object... keys) {
