@@ -19,10 +19,6 @@ import org.hyperledger.fabric.shim.ChaincodeStub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * A storage backend for Hypernate that supports entity sharding.
- * Integrates logic from AssetRepository to split/reassemble entities.
- */
 public class ShardingJSONStorageBackend implements RegistryStorageBackend {
 
     private static final Logger logger = LoggerFactory.getLogger(ShardingJSONStorageBackend.class);
@@ -72,8 +68,6 @@ public class ShardingJSONStorageBackend implements RegistryStorageBackend {
             stub.putState(key, data.getBytes(StandardCharsets.UTF_8));
         }
     }
-
-    /* --- Sharding Logic Integrated from AssetRepository --- */
 
     private <T> void writeShards(T entity, String key, Sharding shardingAnnot) {
         try {
