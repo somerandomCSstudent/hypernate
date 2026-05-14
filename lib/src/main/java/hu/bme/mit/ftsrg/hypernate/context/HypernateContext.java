@@ -5,6 +5,8 @@ import hu.bme.mit.ftsrg.hypernate.middleware.StubMiddleware;
 import hu.bme.mit.ftsrg.hypernate.middleware.StubMiddlewareChain;
 import hu.bme.mit.ftsrg.hypernate.middleware.notification.HypernateNotification;
 import hu.bme.mit.ftsrg.hypernate.registry.Registry;
+import hu.bme.mit.ftsrg.hypernate.registry.RegistryStorageBackend;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Flow;
@@ -16,31 +18,41 @@ import org.hyperledger.fabric.shim.ChaincodeStub;
 /**
  * Context enriched with {@link Registry} and {@link StubMiddleware}s
  *
- * <p>The registry can be used to manage entities.
+ * <p>
+ * The registry can be used to manage entities.
  */
 public class HypernateContext extends Context {
 
-  @Getter private final ChaincodeStub fabricStub;
+  @Getter
+  private final ChaincodeStub fabricStub;
 
-  @Getter private final StubMiddlewareChain middlewareChain;
+  @Getter
+  private final StubMiddlewareChain middlewareChain;
+
+  @Getter
+  private final RegistryStorageBackend backend;
 
   private final List<Subscriber<? super HypernateNotification>> subscribers = new LinkedList<>();
 
   private final Flow.Publisher<HypernateNotification> notificationPublisher = subscribers::add;
 
-  @Getter private final Registry registry;
+  @Getter
+  private final Registry registry;
 
-  public HypernateContext(final StubMiddlewareChain middlewareChain) {
+  public HypernateContext(final StubMiddlewareChain middlewareChain, RegistryStorageBackend backend) {
     super(middlewareChain.getFirst());
     this.middlewareChain = middlewareChain;
     this.fabricStub = middlewareChain.fabricStub();
-    this.registry = new Registry(middlewareChain.getFirst());
+    this.backend = backend;
+    this.registry = new Registry(middlewareChain.getFirst(), backend);
   }
 
   /**
    * Send a {@link HypernateNotification}.
    *
-   * <p>Notifies all middlewares in the chain (in the order in which they have been added).
+   * <p>
+   * Notifies all middlewares in the chain (in the order in which they have been
+   * added).
    *
    * @param notification the notification to send
    */

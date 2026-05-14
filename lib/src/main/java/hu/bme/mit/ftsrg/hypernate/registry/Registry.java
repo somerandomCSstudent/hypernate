@@ -23,14 +23,15 @@ import org.slf4j.LoggerFactory;
 @Loggable(Loggable.DEBUG)
 public class Registry {
 
-  RegistryStorageBackend backend;
-
   private static final Logger logger = LoggerFactory.getLogger(Registry.class);
 
   private final ChaincodeStub stub;
 
-  public Registry(final ChaincodeStub stub) {
+  private final RegistryStorageBackend backend;
+
+  public Registry(final ChaincodeStub stub, RegistryStorageBackend backend) {
     this.stub = stub;
+    this.backend = backend;
   }
 
   /**

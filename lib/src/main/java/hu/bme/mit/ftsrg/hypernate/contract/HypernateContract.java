@@ -1,24 +1,31 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 package hu.bme.mit.ftsrg.hypernate.contract;
 
+import hu.bme.mit.ftsrg.hypernate.annotations.StorageBackend;
 import hu.bme.mit.ftsrg.hypernate.context.HypernateContext;
 import hu.bme.mit.ftsrg.hypernate.middleware.MiddlewareInfo;
 import hu.bme.mit.ftsrg.hypernate.middleware.StubMiddleware;
 import hu.bme.mit.ftsrg.hypernate.middleware.StubMiddlewareChain;
 import hu.bme.mit.ftsrg.hypernate.middleware.notification.TransactionBegin;
 import hu.bme.mit.ftsrg.hypernate.middleware.notification.TransactionEnd;
+import hu.bme.mit.ftsrg.hypernate.registry.RegistryStorageBackend;
+
 import java.util.*;
 import org.hyperledger.fabric.contract.Context;
 import org.hyperledger.fabric.contract.ContractInterface;
 import org.hyperledger.fabric.shim.ChaincodeStub;
 
-/** Contract base class enriched with default before-/after-transaction notification handling. */
+/**
+ * Contract base class enriched with default before-/after-transaction
+ * notification handling.
+ */
 public interface HypernateContract extends ContractInterface {
 
   @Override
   default Context createContext(ChaincodeStub fabricStub) {
     StubMiddlewareChain mwChain = initMiddlewares(fabricStub);
-    HypernateContext ctx = new HypernateContext(mwChain);
+    RegistryStorageBackend registryStorageBackend = initStorageBackend(fabricStub);
+    HypernateContext ctx = new HypernateContext(mwChain, registryStorageBackend);
     mwChain.forEach(ctx::subscribeToNotifications);
     return ctx;
   }
@@ -44,13 +51,18 @@ public interface HypernateContract extends ContractInterface {
   /**
    * Initialize the middleware chain.
    *
-   * <p>Normally, Hypernate processes the {@link MiddlewareInfo} annotation on the contract class if
+   * <p>
+   * Normally, Hypernate processes the {@link MiddlewareInfo} annotation on the
+   * contract class if
    * it exists.
    *
-   * <p>You can override this behaviour with custom middleware initialization logic by overriding
+   * <p>
+   * You can override this behaviour with custom middleware initialization logic
+   * by overriding
    * this method.
    *
-   * @param fabricStub the stub object provided by Fabric (should normally be the last in the chain)
+   * @param fabricStub the stub object provided by Fabric (should normally be the
+   *                   last in the chain)
    * @return the middleware chain
    */
   default StubMiddlewareChain initMiddlewares(final ChaincodeStub fabricStub) {
@@ -64,5 +76,13 @@ public interface HypernateContract extends ContractInterface {
     Arrays.stream(middlewareClasses).forEach(builder::push);
 
     return builder.build();
+  }
+
+  /**
+   * Initialize the storage backend.
+   */
+  default RegistryStorageBackend initStorageBackend(final ChaincodeStub fabricStub) {
+    StorageBackend storageBackendAnnot = getClass().getAnnotation(StorageBackend.class);
+    return null;
   }
 }
